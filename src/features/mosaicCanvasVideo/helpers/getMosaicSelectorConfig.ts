@@ -12,8 +12,8 @@ export const getMosaicSelectorConfig: GetMosaicSelectorConfig = () => {
     return {
       stateValue: numTiles,
       imagePath: {
-        default: `/images/0${numTiles}_mosaic_selector_64x64_off.png`,
-        hilite: `/images/0${numTiles}_mosaic_selector_64x64_on.png`
+        default: `images/0${numTiles}_mosaic_selector_64x64_off.png`,
+        hilite: `images/0${numTiles}_mosaic_selector_64x64_on.png`
       },
       altText: `Click for ${numTiles}-tile video mosaic`
     }

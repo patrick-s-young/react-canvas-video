@@ -1,4 +1,4 @@
-
+import enableInlineVideo from 'iphone-inline-video';
 
 export class MosaicTile {
   // constant values directly initialized by constructor args
@@ -43,6 +43,7 @@ export class MosaicTile {
     this.video.autoplay = true;
     this.video.loop = true;
     this.video.muted = true;
+    this.video.setAttribute('webkit-playsinline', 'webkit-playsinline');
     this.video.play();
     // constant class values
     this.fadeDuration = 500;
