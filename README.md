@@ -3,7 +3,7 @@
 ## Running Locally
 Make sure you have [Node.js](https://nodejs.org/) installed.
 ```
-git clone https://github.com/patrick-s-young/react-ts-eslint-webpack-babel.git
+git clone https://github.com/patrick-s-young/react-canvas-video.git
 cd react-ts-eslint-webpack-babel
 npm install
 npm start
