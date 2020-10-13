@@ -44,15 +44,15 @@ const MosaicVideo: React.FC = () => {
     // use inPoint.length to determine if mosaicSlice has been initialized.
     // initialization occurs in useEffect[src]
     if (canvasRef.current !== null && inPoints[numTiles] !== undefined) {
-    for (let idx = 0; idx < numTiles; idx++) {
+    for (let tileIndex = 0; tileIndex < numTiles; tileIndex++) {
       mosaicTiles.push(
         new MosaicTile(
           canvasRef.current.getContext('2d') as CanvasRenderingContext2D,
-          inPoints[numTiles][idx],
+          inPoints[numTiles][tileIndex],
           copyVideoFromArea[numTiles],
-          drawToCanvasArea[numTiles][idx],
-          tileAnimEvents[numTiles][idx],
-          src as string
+          drawToCanvasArea[numTiles][tileIndex],
+          tileAnimEvents[numTiles][tileIndex],
+          tileIndex
         )
       );
     }
@@ -89,7 +89,8 @@ const MosaicVideo: React.FC = () => {
   }
 
   return(
-		<div className='mosaic-container'>
+    <>
+		<div className='mosaicTiles-canvasContainer'>
       <canvas
         ref={canvasRef}
         width={width as number}
@@ -97,6 +98,20 @@ const MosaicVideo: React.FC = () => {
         style={{backgroundColor: '#eee'}}
       />
     </div>
+    { src !== null && 
+    <div>
+      <video id='v0' className='mosaicTiles-videoContainer' autoPlay loop muted playsInline webkit-playsinline='true' src={src}></video>
+      <video id='v1' className='mosaicTiles-videoContainer' autoPlay loop muted playsInline webkit-playsinline='true' src={src}></video>
+      <video id='v2' className='mosaicTiles-videoContainer' autoPlay loop muted playsInline webkit-playsinline='true' src={src}></video>
+      <video id='v3' className='mosaicTiles-videoContainer' autoPlay loop muted playsInline webkit-playsinline='true' src={src}></video>
+      <video id='v4' className='mosaicTiles-videoContainer' autoPlay loop muted playsInline webkit-playsinline='true' src={src}></video>
+      <video id='v5' className='mosaicTiles-videoContainer' autoPlay loop muted playsInline webkit-playsinline='true' src={src}></video>
+      <video id='v6' className='mosaicTiles-videoContainer' autoPlay loop muted playsInline webkit-playsinline='true' src={src}></video>
+      <video id='v7' className='mosaicTiles-videoContainer' autoPlay loop muted playsInline webkit-playsinline='true' src={src}></video>
+      <video id='v8' className='mosaicTiles-videoContainer' autoPlay loop muted playsInline webkit-playsinline='true' src={src}></video>
+    </div>
+    }
+    </>
   );
 }
 

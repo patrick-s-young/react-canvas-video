@@ -12,7 +12,7 @@ export type NumTiles = 2 | 3 | 4 | 6 | 9;
 // export const numTilesAllPossibleValues to read outside react component
 // used for initializing mosaic video tile values when user video is uploaded.
 export const numTilesAllPossibleValues: Array<NumTiles> = [2, 3, 4, 6, 9];
-const numTilesDefault: NumTiles = 2;
+const numTilesDefault: NumTiles = 4;
 
 export interface MosaicState {
   numTiles: number,

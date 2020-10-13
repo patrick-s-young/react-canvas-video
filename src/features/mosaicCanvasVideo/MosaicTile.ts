@@ -7,7 +7,6 @@ export class MosaicTile {
   // constant values indirectly initialized by constructor args
   video: HTMLVideoElement;
 
-
   // used by 'fadeIn()' and 'fadeOut()' animation
   // mehtods to calculate transparency of video drawn to canvas
   fadeDuration: number;
@@ -28,7 +27,7 @@ export class MosaicTile {
     copyVideoFromArea: { x: number, y: number, width: number, height: number },
     drawToCanvasArea: { x: number, y: number, width: number, height: number },
     tileAnimEvents: Array<{ time: number, action: string }>,
-    src: string
+    tileIndex: number
   ) {
     // constant values directly initialized by corresponding constructor args
     this.context = context;
@@ -36,12 +35,14 @@ export class MosaicTile {
     this.copyFrom = copyVideoFromArea;
     this.drawTo = drawToCanvasArea;
     // constant values indirectly initialized by constructor args
-    this.video = document.createElement('video');
+    this.video = document.getElementById(`v${tileIndex}`) as HTMLVideoElement;
+    /*
     this.video.src = src; 
     this.video.autoplay = true;
     this.video.loop = true;
     this.video.muted = true;
     this.video.play();
+    */
     // constant class values
     this.fadeDuration = 500;
     // dynamic values
