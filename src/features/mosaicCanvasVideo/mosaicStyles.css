@@ -1,0 +1,19 @@
+.mosaic-container {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  flex-shrink: 1;
+}
+
+.mosaicSelector-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.mosaicSelector-button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
