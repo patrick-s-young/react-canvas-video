@@ -2,7 +2,6 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { VideoState } from 'features/userVideo/videoSlice';
 import {
   getInPoints,
-  getTileSize,
   getTileAnimEvents,
   getDrawToCanvasArea,
   getCopyVideoFromArea
