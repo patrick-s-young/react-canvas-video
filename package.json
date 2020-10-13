@@ -1,10 +1,10 @@
 {
-  "name": "react-mosaic-video",
+  "name": "react-canvas-video",
   "version": "1.0.0",
-  "description": "Mosaic sandbox",
+  "description": "Perform multiple video draws to a shared canvas using requestAnimationFrame",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/patrick-s-young/react-canvas-video.git"
   },
   "main": "index.js",
   "scripts": {
