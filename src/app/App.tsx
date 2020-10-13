@@ -44,7 +44,7 @@ const App: React.FC = () => {
 
 	
 	return (
-			<div className='app-container'>
+			<div className='app-container' style={{width: '480px'}}>
       	{src !== null &&
 					<div>
 						<MosaicTiles />
