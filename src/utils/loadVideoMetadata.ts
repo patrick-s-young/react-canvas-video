@@ -9,7 +9,7 @@ interface LoadVideoMetadata {
  (filePath: string, waitLimit: number): Promise<VideoMetadata>
 }
 
-const loadVideoMetadata: LoadVideoMetadata = (
+export const loadVideoMetadata: LoadVideoMetadata = (
   filePath,
   waitLimit) => {
   let timeoutId: NodeJS.Timeout;
@@ -39,5 +39,3 @@ const loadVideoMetadata: LoadVideoMetadata = (
     timeout
   ]);
 }
-
-export default loadVideoMetadata;

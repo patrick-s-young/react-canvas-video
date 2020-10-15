@@ -1,22 +1,20 @@
 import * as React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from 'app/rootReducer';
+import type { NumTiles } from 'features/mosaicCanvasVideo';
 import { getMosaicSelectorConfig } from 'features/mosaicCanvasVideo/helpers';
-import { setNumTiles } from 'features/mosaicCanvasVideo/mosaicSlice';
-import type { NumTiles } from 'features/mosaicCanvasVideo/mosaicSlice';
 import Button from 'components/Button';
 import { v1 as uuid } from 'uuid';
 import 'features/mosaicCanvasVideo/mosaicStyles.css';
 
-const MosaicSelector: React.FC = () => {
-  const dispatch = useDispatch();
+export interface MosaicSelectorProps {
+  onClickHandler: (newStateValue: NumTiles) => void
+}
 
+export const MosaicSelector: React.FC<MosaicSelectorProps> = ({ onClickHandler }) => {
   const { numTiles } = useSelector(
 		( state: RootState ) => state.mosaic
-	);
-  const onClickHandler = (newStateValue: NumTiles) => {
-    dispatch(setNumTiles(newStateValue));
-  }
+  );
 
   return (
     <div className={'mosaicSelector-container'}>
@@ -35,6 +33,6 @@ const MosaicSelector: React.FC = () => {
   );
 }
 
-export default MosaicSelector;
+
 
 
