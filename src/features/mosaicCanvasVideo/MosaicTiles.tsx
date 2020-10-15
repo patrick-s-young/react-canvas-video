@@ -1,20 +1,19 @@
-import { useEffect, useRef } from 'react';
 import * as React from 'react';
-import { useSelector } from 'react-redux';
-import { useDispatch } from 'react-redux';
-import { setMosaicVideo } from 'features/mosaicCanvasVideo/mosaicSlice';
-import { MosaicTile } from 'features/mosaicCanvasVideo/MosaicTile';
-import 'features/mosaicCanvasVideo/mosaicStyles.css';
+import { useEffect, useRef } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { MosaicTile, MosaicSelector, setMosaicVideo, setNumTiles } from 'features/mosaicCanvasVideo';
 import type { RootState } from 'app/rootReducer';
-import type { MosaicState } from 'features/mosaicCanvasVideo/mosaicSlice';
+import type { MosaicState, NumTiles } from 'features/mosaicCanvasVideo';
 import type { VideoState } from 'features/userVideo/videoSlice';
+import 'features/mosaicCanvasVideo/mosaicStyles.css';
 
-const MosaicVideo: React.FC = () => {
+export const MosaicTiles: React.FC = () => {
   const dispatch = useDispatch();
-  const animationFrameReq = useRef<number>(0);
+  let animationFrameReq: number;
   const canvasRef = useRef() as React.MutableRefObject<HTMLCanvasElement>;
   const { 
-    numTiles, 
+    numTiles,
+    canvasWidth, 
     inPoints, 
     copyVideoFromArea,
     drawToCanvasArea,
@@ -28,6 +27,12 @@ const MosaicVideo: React.FC = () => {
     height } = useSelector<RootState, VideoState>(
     (state) => state.video
   );
+
+  const onClickHandler = (newStateValue: NumTiles) => {
+    cancelAnimationFrame(animationFrameReq);
+    mosaicTiles.forEach(tile => tile.clear());
+    dispatch(setNumTiles(newStateValue));
+  }
   let mosaicTiles: Array<MosaicTile> = [];
   // fifteen second video mosaic loop - move to config or slice
   const animationCycleDuration: number = 15000 
@@ -40,9 +45,6 @@ const MosaicVideo: React.FC = () => {
   }, [src]);
 
   useEffect(() => {
-    console.log(`numTiles: ${numTiles}`)
-    // use inPoint.length to determine if mosaicSlice has been initialized.
-    // initialization occurs in useEffect[src]
     if (canvasRef.current !== null && inPoints[numTiles] !== undefined) {
     for (let tileIndex = 0; tileIndex < numTiles; tileIndex++) {
       mosaicTiles.push(
@@ -52,19 +54,23 @@ const MosaicVideo: React.FC = () => {
           copyVideoFromArea[numTiles],
           drawToCanvasArea[numTiles][tileIndex],
           tileAnimEvents[numTiles][tileIndex],
-          tileIndex
+          src
         )
       );
     }
-    mosaicTiles[0].video.addEventListener('play', start);
+    setTimeout(() => {
+      mosaicTiles.forEach(tile => tile.start());
+      start()
+    }, 500);
+    //mosaicTiles[0].video.addEventListener('play', start);
   }
   }, [numTiles, inPoints, copyVideoFromArea, drawToCanvasArea, tileAnimEvents]);
 
 
 
   function start () {
-    if (animationFrameReq.current !== 0) cancelAnimationFrame(animationFrameReq.current);
     
+    const context = canvasRef.current.getContext('2d') as CanvasRenderingContext2D
     let beginTime = performance.now();
 
     function step(timeStamp: DOMHighResTimeStamp) {
@@ -80,12 +86,13 @@ const MosaicVideo: React.FC = () => {
         if (elapsedTime > mosaicTile.nextEventTime) {
           mosaicTile.updateEvent();
         }
+        //context.clearRect(0, 0, canvasWidth, canvasWidth);
         mosaicTile.currentEventAction();
       });
 
-      animationFrameReq.current = requestAnimationFrame(step);
+      animationFrameReq = requestAnimationFrame(step);
     }
-    animationFrameReq.current = requestAnimationFrame(step);
+    animationFrameReq = requestAnimationFrame(step);
   }
 
   return(
@@ -93,26 +100,13 @@ const MosaicVideo: React.FC = () => {
 		<div className='mosaicTiles-canvasContainer'>
       <canvas
         ref={canvasRef}
-        width={width as number}
-        height={height as number}
+        width={canvasWidth}
+        height={canvasWidth}
         style={{backgroundColor: '#eee'}}
       />
     </div>
-    { src !== null && 
-    <div>
-      <video id='v0' className='mosaicTiles-videoContainer' autoPlay loop muted playsInline webkit-playsinline='true' src={src}></video>
-      <video id='v1' className='mosaicTiles-videoContainer' autoPlay loop muted playsInline webkit-playsinline='true' src={src}></video>
-      <video id='v2' className='mosaicTiles-videoContainer' autoPlay loop muted playsInline webkit-playsinline='true' src={src}></video>
-      <video id='v3' className='mosaicTiles-videoContainer' autoPlay loop muted playsInline webkit-playsinline='true' src={src}></video>
-      <video id='v4' className='mosaicTiles-videoContainer' autoPlay loop muted playsInline webkit-playsinline='true' src={src}></video>
-      <video id='v5' className='mosaicTiles-videoContainer' autoPlay loop muted playsInline webkit-playsinline='true' src={src}></video>
-      <video id='v6' className='mosaicTiles-videoContainer' autoPlay loop muted playsInline webkit-playsinline='true' src={src}></video>
-      <video id='v7' className='mosaicTiles-videoContainer' autoPlay loop muted playsInline webkit-playsinline='true' src={src}></video>
-      <video id='v8' className='mosaicTiles-videoContainer' autoPlay loop muted playsInline webkit-playsinline='true' src={src}></video>
-    </div>
-    }
+    <MosaicSelector
+      onClickHandler={onClickHandler}/>
     </>
   );
 }
-
-export default MosaicVideo;
