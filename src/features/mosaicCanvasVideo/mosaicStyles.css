@@ -2,27 +2,23 @@
   display: flex;
   flex-direction: column;
   align-items: left;
-  flex-shrink: 1;
 }
 
+
 .mosaicTiles-videoContainer {
-    position: absolute;
-    visibility: hidden;
+  position: absolute;
+  visibility: hidden;
 }
 
 .mosaicSelector-container {
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: space-evenly;
 }
 
 .mosaicSelector-button {
   display: flex;
   flex-direction: row;
   align-items: center;
-}
-
-.videoContainer {
-  position: absolute;
-  visibility: hidden;
 }
