@@ -16,6 +16,7 @@ const numTilesDefault: NumTiles = 4;
 
 export interface MosaicState {
   numTiles: number,
+  canvasWidth: number,
   inPoints: { [key: string] : Array<number> },
   copyVideoFromArea: { [index: string] : { x: number, y: number, width: number, height: number }},
   drawToCanvasArea: { [key: string] : Array<{ x: number, y: number, width: number, height: number }> },
@@ -24,6 +25,7 @@ export interface MosaicState {
 
 const initialState: MosaicState = {
   numTiles: numTilesDefault,
+  canvasWidth: 0,
   inPoints: {},
   copyVideoFromArea: { 0: {x: 0, y: 0, width: 0, height: 0}},
   drawToCanvasArea: {},
@@ -39,9 +41,13 @@ const mosaicSlice = createSlice({
       if (duration && width && height) {
         state.inPoints = getInPoints(duration);
         state.copyVideoFromArea = getCopyVideoFromArea(width, height);
-        state.drawToCanvasArea = getDrawToCanvasArea(width, height);
         state.tileAnimEvents = getTileAnimEvents();
       }
+    },
+    setMosaicCanvas (state, action: PayloadAction<number>) {
+      const canvasWidth = action.payload;
+      state.canvasWidth = canvasWidth;
+      state.drawToCanvasArea = getDrawToCanvasArea(canvasWidth, canvasWidth);
     },
     setNumTiles (state, action: PayloadAction<NumTiles>) {
       const numTiles = action.payload;
@@ -52,6 +58,7 @@ const mosaicSlice = createSlice({
 
 export const {
   setMosaicVideo,
+  setMosaicCanvas,
   setNumTiles
 } = mosaicSlice.actions;
 
