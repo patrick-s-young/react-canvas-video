@@ -1,23 +1,24 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setVideoData } from 'features/userVideo/videoSlice';
-import loadVideoMetadata from 'utils/loadVideoMetadata';
-import MosaicTiles from 'features/mosaicCanvasVideo/MosaicTiles';
-import MosaicSelector from 'features/mosaicCanvasVideo/MosaicSelector';
-import type { RootState } from 'app/rootReducer';
+import { MosaicTiles, setMosaicCanvas } from 'features/mosaicCanvasVideo';
+import { loadVideoMetadata, preloadVideo} from 'utils';
 import type { VideoState } from 'features/userVideo/videoSlice';
-import type { VideoMetadata } from 'utils/loadVideoMetadata';
+import type { RootState } from 'app/rootReducer';
+import type { VideoMetadata } from 'utils';
 import 'app/app.css';
 
 const App: React.FC = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [videoSrc, setVideoSrc] = useState<string | null>(null);
 	const dispatch = useDispatch();
-	const { src } = useSelector<RootState, VideoState>(
+	const { src, width } = useSelector<RootState, VideoState>(
 		(state) => state.video
-  );
+	);
+  const { canvasWidth } = useSelector(
+		( state: RootState ) => state.mosaic
+	);
 
 	const onSetVideoData = (videoMetadata: VideoMetadata) =>
 		dispatch(setVideoData({
@@ -28,9 +29,16 @@ const App: React.FC = () => {
 		})
 	);
 
+	const onSetMosaicCanvas = (videoWidth: number) => {
+		const canvasWidth = videoWidth > window.innerWidth ? window.innerWidth : videoWidth;
+		dispatch(setMosaicCanvas(canvasWidth));
+	}
+
 	useEffect(() => {
 		// placeholder for user file upload functionality
-		setVideoSrc("video/swing.mp4");
+		preloadVideo('video/swing_480x480.mp4')
+		.then(setVideoSrc)
+		.catch(setError);
 	}, []);
 
 	useEffect(() => {
@@ -42,15 +50,20 @@ const App: React.FC = () => {
 		}
   }, [videoSrc]);
 
-	
+	useEffect(() => {
+		if (width !== null) {
+			onSetMosaicCanvas(width);
+		}
+	}, [width]);
+
 	return (
-			<div className='app-container' style={{width: '480px'}}>
+			<div className='app-container'>
       	{src !== null &&
-					<div>
+					<div style={{width: `${canvasWidth}px`}}>
 						<MosaicTiles />
-						<MosaicSelector />
 					</div>
 				}
+				{src === null && <div>LOADING...</div>}
       	{error !== null && <div>{error}</div>}
 			</div>
 	);
