@@ -11,8 +11,8 @@ const App: React.FC = () => {
 	// conditional render <VideoUpload> or <MosaicTiles>
 	const [videoReady, setVideoReady] = useState<boolean>(false);
 	// set app screen width relative to video width
-	const { src, duration, width, height } = useSelector<RootState, VideoState>((state) => state.video as VideoState);
-	const appScreenWidth: Partial<number> = width > window.innerWidth ? window.innerWidth : width;
+	const { src, duration, width, height } = useSelector<RootState, VideoState>((state) => state.video);
+	const appScreenWidth = width === undefined || width > window.innerWidth ? window.innerWidth : width;
 	// callback from <VideoUpload> when user-selected video is ready
 	const onVideoSelectedCallback = () => {
 		setVideoReady(true);

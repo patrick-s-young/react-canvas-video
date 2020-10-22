@@ -23,17 +23,17 @@ export type TimeGroupCollection = { [key in NumTilesToString] : TimeGroup };
 export interface MosaicState {
   numTiles: NumTiles,
   canvasWidth: number,
-  inPoints: TimeGroupCollection,
-  copyVideoFromArea: RectCollection,
-  drawToCanvasArea: RectGroupCollection,
-  tileAnimEvents: ActionGroupCollection
+  inPoints: TimeGroupCollection | undefined,
+  copyVideoFromArea: RectCollection | undefined,
+  drawToCanvasArea: RectGroupCollection | undefined,
+  tileAnimEvents: ActionGroupCollection | undefined
 }
 
 export const numTilesAllPossibleValues: Array<NumTiles> = [2, 3, 4, 6, 9];
 const numTilesDefault: NumTiles = 3;
-const initialState: Partial<MosaicState> = {
-  numTiles: undefined,
-  canvasWidth: undefined,
+const initialState: MosaicState = {
+  numTiles: numTilesDefault,
+  canvasWidth: 100,
   inPoints: undefined,
   copyVideoFromArea: undefined,
   drawToCanvasArea: undefined,
@@ -64,7 +64,6 @@ const mosaicSlice = createSlice({
 
 export const {
   setMosaicVideo,
-  setMosaicCanvas,
   setNumTiles
 } = mosaicSlice.actions;
 

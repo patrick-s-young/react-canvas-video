@@ -2,13 +2,13 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 
 export interface VideoState {
-  src: string
-  duration: number
-  width: number
-  height: number
+  src: string | undefined
+  duration: number | undefined
+  width: number | undefined
+  height: number | undefined
 }
 
-const initialState: Partial<VideoState> = {
+const initialState: VideoState = {
   src: undefined,
   duration: undefined,
   width: undefined,

@@ -16,16 +16,15 @@ export const getDrawToCanvasArea: GetDrawToCanvasArea = (videoWidth, videoHeight
   }
   // calcualte x/y origin of canvas area to be drawn to
   const drawToCanvasArea: Partial<RectGroupCollection> = {};
-  numTilesAllPossibleValues.forEach(numTiles => { 
-    drawToCanvasArea[numTiles] = rowCol[numTiles].map(({ row, col }) => {
-      return {
-        x: col * tileSize[numTiles].width, 
-        y: row * tileSize[numTiles].height, 
-        width: tileSize[numTiles].width, 
-        height: tileSize[numTiles].height       
-      }});
-    });
-  
+  numTilesAllPossibleValues.forEach(numTiles => {
+    drawToCanvasArea[numTiles] = rowCol[numTiles].map(({ row, col }) => ({
+      x: col * tileSize[numTiles].width, 
+      y: row * tileSize[numTiles].height, 
+      width: tileSize[numTiles].width, 
+      height: tileSize[numTiles].height
+    }));
+  });
+
   return drawToCanvasArea as RectGroupCollection;
 }
 

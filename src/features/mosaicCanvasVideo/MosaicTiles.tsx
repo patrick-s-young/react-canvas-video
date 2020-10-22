@@ -7,10 +7,10 @@ import type { MosaicState, MosaicTile, NumTiles } from 'features/mosaicCanvasVid
 import 'features/mosaicCanvasVideo/mosaicStyles.css';
 
 interface MosaicTilesProps {
-    src: string
-    duration: number
-    width: number
-    height: number
+    src: string | undefined
+    duration: number | undefined
+    width: number | undefined
+    height: number | undefined
 }
 
 export const MosaicTiles: React.FC<MosaicTilesProps> = ({
@@ -30,16 +30,18 @@ export const MosaicTiles: React.FC<MosaicTilesProps> = ({
     copyVideoFromArea,
     drawToCanvasArea,
     tileAnimEvents } = useSelector<RootState, MosaicState>(
-		(state) => state.mosaic as MosaicState
+		(state) => state.mosaic
   );
   // dispatch setMosaicVideo({ duration, width, height }) to mosaicSlice
   const dispatch = useDispatch();
   // conditional render when mosaicSlice values have been initialized
-  const [ mosaicStateLoaded, setMosaicStateLoaded] = useState<boolean>(false);
+  const [mosaicStateLoaded, setMosaicStateLoaded] = useState<boolean>(false);
   // initialized on change in src video duration/dimensions
   useEffect(() => {
+    if (duration !== undefined && width !== undefined && height !== undefined) {
       dispatch(setMosaicVideo({ duration, width, height }));
       setMosaicStateLoaded(true);
+    }
   }, [duration, width, height]);
 
 
@@ -51,16 +53,19 @@ export const MosaicTiles: React.FC<MosaicTilesProps> = ({
   //const [ mosaicTiles, setMosaicTiles ] = useState<Array<MosaicTile>>([]);
   const [ mosaicTiles, setMosaicTiles ] = useState<Array<MosaicTile>>([]);
   // each mosaicTile object has a refence to the canvas used in context.drawImage(video) method 
-  const canvasRef = useRef() as React.MutableRefObject<HTMLCanvasElement>;
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   // when mosaicSlice 'numTiles' state changes reinitialized 'mosaicTiles'
   // todo: move to redux
   useEffect(() => {
-    if (canvasRef.current !== null && mosaicStateLoaded) {
+    if (
+      canvasRef.current && mosaicStateLoaded && inPoints && copyVideoFromArea && drawToCanvasArea
+      && tileAnimEvents
+    ) {
       const newMosaicTiles: Array<MosaicTile> = [];
       for (let tileIndex = 0; tileIndex < numTiles; tileIndex++) {
         const newMosaicTile = Object.create(mosaicTile);
         newMosaicTile.setVideoSrc(src);
-        newMosaicTile.setContext(canvasRef.current.getContext('2d') as CanvasRenderingContext2D);
+        newMosaicTile.setContext(canvasRef.current.getContext('2d'));
         newMosaicTile.setAttributes(
           inPoints[numTiles][tileIndex],
 					copyVideoFromArea[numTiles],
@@ -121,7 +126,7 @@ export const MosaicTiles: React.FC<MosaicTilesProps> = ({
   // mosaicSlice 'numTiles' state options 2, 3, 4, 6, or 9 tiles
   const onClickHandler = (newStateValue: NumTiles) => {
     cancelAnimationFrame(frameID);
-    canvasRef.current.getContext('2d')?.clearRect(0, 0, canvasWidth, canvasWidth);
+    canvasRef.current?.getContext('2d')?.clearRect(0, 0, canvasWidth, canvasWidth);
     mosaicTiles.forEach(tile => tile.clearAnimation());
     dispatch(setNumTiles(newStateValue));
   }
@@ -129,7 +134,7 @@ export const MosaicTiles: React.FC<MosaicTilesProps> = ({
 
   return(
     <>
-    { setMosaicStateLoaded && 
+    { mosaicStateLoaded && 
     <div>
 		  <div className='mosaicTiles-canvasContainer'>
         <canvas
