@@ -10,10 +10,10 @@ const Button: React.FC<ButtonProps> = ({
   altText
 }) => {
   return (
-    <div className={className}>
+    <div >
       { isEnabled ? 
-          <img src={imagePath.hilite} onClick={() => onClickCallback(stateValue)} alt={altText} /> 
-        : <img src={imagePath.default} alt={altText} />
+          <img src={imagePath} className={className.default} onClick={() => onClickCallback(stateValue)} alt={altText} /> 
+        : <img src={imagePath} className={className.hilite} alt={altText} />
       }
     </div>
   );

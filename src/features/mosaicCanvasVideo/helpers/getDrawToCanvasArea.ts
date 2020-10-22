@@ -1,12 +1,12 @@
 import { numTilesAllPossibleValues } from 'features/mosaicCanvasVideo/mosaicSlice';
+import type { RectGroupCollection } from 'features/mosaicCanvasVideo/mosaicSlice';
 
 interface GetDrawToCanvasArea {
-  (videoWidth: number, videoHeight: number): { [key: string] : Array<{ x: number, y: number, width: number, height: number }> }
+  (videoWidth: number, videoHeight: number): RectGroupCollection
 } 
 
 export const getDrawToCanvasArea: GetDrawToCanvasArea = (videoWidth, videoHeight) => {
-  const drawToCanvasArea: { [key: string] : Array<{ x: number, y: number, width: number, height: number }> } = {};
-
+  // hard-coded ratios for calculating width/height of canvas area to be drawn to
   const tileSize: { [key: string] : {width: number, height: number } } = {
     2: { width: videoWidth / 2, height: videoHeight},
     3: { width: videoWidth / 3, height: videoHeight},
@@ -14,7 +14,8 @@ export const getDrawToCanvasArea: GetDrawToCanvasArea = (videoWidth, videoHeight
     6: { width: videoWidth / 3, height: videoHeight / 2 },
     9: { width: videoWidth / 3, height: videoHeight / 3 }
   }
-
+  // calcualte x/y origin of canvas area to be drawn to
+  const drawToCanvasArea: Partial<RectGroupCollection> = {};
   numTilesAllPossibleValues.forEach(numTiles => { 
     drawToCanvasArea[numTiles] = rowCol[numTiles].map(({ row, col }) => {
       return {
@@ -22,14 +23,14 @@ export const getDrawToCanvasArea: GetDrawToCanvasArea = (videoWidth, videoHeight
         y: row * tileSize[numTiles].height, 
         width: tileSize[numTiles].width, 
         height: tileSize[numTiles].height       
-      }})
+      }});
     });
-
-  return drawToCanvasArea;
+  
+  return drawToCanvasArea as RectGroupCollection;
 }
 
 
-// hard coded values can be calculated for less verbosity
+// hard-coded origin x/y ratios can be calculated for less verbosity
 const rowCol: { [index: string] : Array<{row: number, col: number}> } = {
   2:[
       {row: 0, col: 0},

@@ -1,7 +1,9 @@
-export interface GetCopyVideoFromArea {
-  (videoWidth: number, videoHeight: number): { [index: string] : { x: number, y: number, width: number, height: number }}
-} 
+import type { RectCollection } from 'features/mosaicCanvasVideo/mosaicSlice';
 
+export interface GetCopyVideoFromArea {
+  (videoWidth: number, videoHeight: number): RectCollection
+} 
+// grab the center of the video using the width/height ratio of the mosiaic tile. 
 export const getCopyVideoFromArea: GetCopyVideoFromArea = (videoWidth, videoHeight) => {
   return {
     2: { x: videoWidth / 4, y: 0, width: videoWidth / 2, height: videoHeight},

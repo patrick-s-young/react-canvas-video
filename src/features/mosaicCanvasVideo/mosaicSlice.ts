@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { VideoState } from 'features/userVideo/videoSlice';
 import {
   getInPoints,
   getTileAnimEvents,
@@ -7,47 +6,54 @@ import {
   getCopyVideoFromArea
 }  from 'features/mosaicCanvasVideo/helpers';
 
-
 export type NumTiles = 2 | 3 | 4 | 6 | 9;
-// export const numTilesAllPossibleValues to read outside react component
-// used for initializing mosaic video tile values when user video is uploaded.
-export const numTilesAllPossibleValues: Array<NumTiles> = [2, 3, 4, 6, 9];
-const numTilesDefault: NumTiles = 4;
+export type NumTilesToString = '2' | '3' | '4' | '6' | '9';
+export type Rect = { x: number, y: number, width: number, height: number };
+export type RectGroup = Array<Rect>;
+export type RectGroupCollection = { [key in NumTilesToString] : RectGroup };
+export type RectCollection = { [key in NumTilesToString]: Rect }
+export type Action = { time: number, action: string }
+export type ActionGroup = Array<Array<Action>>;
+export type ActionGroupCollection = { [key in NumTilesToString] : ActionGroup };
+export type Time = number;
+export type TimeGroup = Array<Time>;
+export type TimeGroupCollection = { [key in NumTilesToString] : TimeGroup };
+
 
 export interface MosaicState {
-  numTiles: number,
+  numTiles: NumTiles,
   canvasWidth: number,
-  inPoints: { [key: string] : Array<number> },
-  copyVideoFromArea: { [index: string] : { x: number, y: number, width: number, height: number }},
-  drawToCanvasArea: { [key: string] : Array<{ x: number, y: number, width: number, height: number }> },
-  tileAnimEvents: { [index: string] : Array<Array<{ time: number, action: string }>> }
+  inPoints: TimeGroupCollection,
+  copyVideoFromArea: RectCollection,
+  drawToCanvasArea: RectGroupCollection,
+  tileAnimEvents: ActionGroupCollection
 }
 
-const initialState: MosaicState = {
-  numTiles: numTilesDefault,
-  canvasWidth: 0,
-  inPoints: {},
-  copyVideoFromArea: { 0: {x: 0, y: 0, width: 0, height: 0}},
-  drawToCanvasArea: {},
-  tileAnimEvents: {}
+export const numTilesAllPossibleValues: Array<NumTiles> = [2, 3, 4, 6, 9];
+const numTilesDefault: NumTiles = 3;
+const initialState: Partial<MosaicState> = {
+  numTiles: undefined,
+  canvasWidth: undefined,
+  inPoints: undefined,
+  copyVideoFromArea: undefined,
+  drawToCanvasArea: undefined,
+  tileAnimEvents: undefined
 }
 
 const mosaicSlice = createSlice({
   name: 'mosaic',
   initialState,
   reducers: {
-    setMosaicVideo (state, action: PayloadAction<VideoState>) {
+    setMosaicVideo (state, action: PayloadAction<{duration: number, width: number, height: number}>) {
       const { duration, width, height } = action.payload;
       if (duration && width && height) {
         state.inPoints = getInPoints(duration);
         state.copyVideoFromArea = getCopyVideoFromArea(width, height);
         state.tileAnimEvents = getTileAnimEvents();
+        state.canvasWidth = width > window.innerWidth ? window.innerWidth : width;
+        state.drawToCanvasArea = getDrawToCanvasArea(state.canvasWidth, state.canvasWidth);
+        state.numTiles = numTilesDefault;
       }
-    },
-    setMosaicCanvas (state, action: PayloadAction<number>) {
-      const canvasWidth = action.payload;
-      state.canvasWidth = canvasWidth;
-      state.drawToCanvasArea = getDrawToCanvasArea(canvasWidth, canvasWidth);
     },
     setNumTiles (state, action: PayloadAction<NumTiles>) {
       const numTiles = action.payload;

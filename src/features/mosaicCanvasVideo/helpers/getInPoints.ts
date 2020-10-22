@@ -1,20 +1,21 @@
 import { numTilesAllPossibleValues } from 'features/mosaicCanvasVideo/mosaicSlice';
+import type { TimeGroup, TimeGroupCollection } from 'features/mosaicCanvasVideo/mosaicSlice';
 
 interface GetInPoints {
-  (duration: number): { [key: string] : Array<number> }
+  (duration: number): TimeGroupCollection
 }
 
 export const getInPoints: GetInPoints = (duration) => {
-  const inPointsAll: { [key: string] : Array<number> } = {};
+  const inPointsCollection: Partial<TimeGroupCollection> = {};
 
   numTilesAllPossibleValues.forEach(numTiles => { 
     const secondsIncrement = (duration - 2.0) / numTiles;
-    const inPoints: Array<number> = [];
+    const inPointGroup: TimeGroup = [];
     for (let tileIndex = 0; tileIndex < numTiles; tileIndex++) {
-      inPoints.push((tileIndex + 1) * secondsIncrement);
+      inPointGroup.push((tileIndex + 1) * secondsIncrement);
     }
-    inPointsAll[numTiles] = inPoints;
+    inPointsCollection[numTiles] = inPointGroup;
   });
 
-  return inPointsAll;
+  return inPointsCollection as TimeGroupCollection;
 }
