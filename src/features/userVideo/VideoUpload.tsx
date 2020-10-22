@@ -30,7 +30,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({ onVideoSelectedCallbac
     setVideoSelected(true);
   }
   // placeholder value for user's video upload
-  const videoPath: string = 'video/swing_480x480.mp4';
+  const videoPath: string = 'video/swing_480x480_24fps.mp4';
   // preload video as blob (for iOS autoplay) and update videoSlice w/ metadata
 	useEffect(() => {
 		preloadVideo(videoPath)
