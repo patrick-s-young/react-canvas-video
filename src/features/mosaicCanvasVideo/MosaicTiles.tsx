@@ -1,16 +1,28 @@
 import * as React from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { MosaicTile, MosaicSelector, setMosaicVideo, setNumTiles } from 'features/mosaicCanvasVideo';
+import { MosaicSelector, setMosaicVideo, setNumTiles, mosaicTile } from 'features/mosaicCanvasVideo';
 import type { RootState } from 'app/rootReducer';
-import type { MosaicState, NumTiles } from 'features/mosaicCanvasVideo';
-import type { VideoState } from 'features/userVideo/videoSlice';
+import type { MosaicState, MosaicTile, NumTiles } from 'features/mosaicCanvasVideo';
 import 'features/mosaicCanvasVideo/mosaicStyles.css';
 
-export const MosaicTiles: React.FC = () => {
-  const dispatch = useDispatch();
-  let animationFrameReq: number;
-  const canvasRef = useRef() as React.MutableRefObject<HTMLCanvasElement>;
+interface MosaicTilesProps {
+    src: string
+    duration: number
+    width: number
+    height: number
+}
+
+export const MosaicTiles: React.FC<MosaicTilesProps> = ({
+  src,
+  duration,
+  width,
+  height
+}) => {
+  ///// MOSAIC SLICE ///////////////////////////////////
+  // mosaicSlice values describe the timing and the dimensions
+  // of video drawn to a 2d canvas, resulting in a mosaic-like pattern.
+  // default values are undefined
   const { 
     numTiles,
     canvasWidth, 
@@ -18,95 +30,119 @@ export const MosaicTiles: React.FC = () => {
     copyVideoFromArea,
     drawToCanvasArea,
     tileAnimEvents } = useSelector<RootState, MosaicState>(
-		(state) => state.mosaic
+		(state) => state.mosaic as MosaicState
   );
-  const { 
-    src, 
-    duration, 
-    width, 
-    height } = useSelector<RootState, VideoState>(
-    (state) => state.video
-  );
-
-  const onClickHandler = (newStateValue: NumTiles) => {
-    cancelAnimationFrame(animationFrameReq);
-    mosaicTiles.forEach(tile => tile.clear());
-    dispatch(setNumTiles(newStateValue));
-  }
-  let mosaicTiles: Array<MosaicTile> = [];
-  // fifteen second video mosaic loop - move to config or slice
-  const animationCycleDuration: number = 15000 
-
+  // dispatch setMosaicVideo({ duration, width, height }) to mosaicSlice
+  const dispatch = useDispatch();
+  // conditional render when mosaicSlice values have been initialized
+  const [ mosaicStateLoaded, setMosaicStateLoaded] = useState<boolean>(false);
+  // initialized on change in src video duration/dimensions
   useEffect(() => {
-    // when new user video is uploaded, update mosaic video values
-    if (src !== null) {
-      dispatch(setMosaicVideo({ src, duration, width, height }));
-    }
-  }, [src]);
+      dispatch(setMosaicVideo({ duration, width, height }));
+      setMosaicStateLoaded(true);
+  }, [duration, width, height]);
 
+
+
+  ///// MOSAIC TILE OBJECTS ///////////////////////////////////
+  // mosaicSlice 'numTiles' state value corresponds to the number of MosaicTile objects
+  // used in each mosaic pattern. There are mosaic patterns for 2, 3, 4, 6, and 9 tiles. 
+  // MosaicTile objects are held in 'mosaicTiles' array.
+  //const [ mosaicTiles, setMosaicTiles ] = useState<Array<MosaicTile>>([]);
+  const [ mosaicTiles, setMosaicTiles ] = useState<Array<MosaicTile>>([]);
+  // each mosaicTile object has a refence to the canvas used in context.drawImage(video) method 
+  const canvasRef = useRef() as React.MutableRefObject<HTMLCanvasElement>;
+  // when mosaicSlice 'numTiles' state changes reinitialized 'mosaicTiles'
+  // todo: move to redux
   useEffect(() => {
-    if (canvasRef.current !== null && inPoints[numTiles] !== undefined) {
-    for (let tileIndex = 0; tileIndex < numTiles; tileIndex++) {
-      mosaicTiles.push(
-        new MosaicTile(
-          canvasRef.current.getContext('2d') as CanvasRenderingContext2D,
+    if (canvasRef.current !== null && mosaicStateLoaded) {
+      const newMosaicTiles: Array<MosaicTile> = [];
+      for (let tileIndex = 0; tileIndex < numTiles; tileIndex++) {
+        const newMosaicTile = Object.create(mosaicTile);
+        newMosaicTile.setVideoSrc(src);
+        newMosaicTile.setContext(canvasRef.current.getContext('2d') as CanvasRenderingContext2D);
+        newMosaicTile.setAttributes(
           inPoints[numTiles][tileIndex],
-          copyVideoFromArea[numTiles],
-          drawToCanvasArea[numTiles][tileIndex],
-          tileAnimEvents[numTiles][tileIndex],
-          src
+					copyVideoFromArea[numTiles],
+					drawToCanvasArea[numTiles][tileIndex],
+					tileAnimEvents[numTiles][tileIndex]
         )
-      );
-    }
-    setTimeout(() => {
-      mosaicTiles.forEach(tile => tile.start());
-      start()
-    }, 500);
-    //mosaicTiles[0].video.addEventListener('play', start);
+        newMosaicTiles.push(newMosaicTile);
+      }
+      setMosaicTiles(newMosaicTiles);
   }
-  }, [numTiles, inPoints, copyVideoFromArea, drawToCanvasArea, tileAnimEvents]);
+  }, [numTiles, mosaicStateLoaded]);
+
+  
 
 
-
-  function start () {
-    
-    const context = canvasRef.current.getContext('2d') as CanvasRenderingContext2D
+  ///// ANIMATION LOOP ///////////////////////////////////
+  // each mosiacTile object in the 'mosaicTiles' array is checked to 
+  // see if its animation sequence is due for an update based on the 
+  // time elapsed from the beginning of the current loop
+  useEffect(() => {
+    // start 
+    mosaicTiles.forEach(tile => tile.initAnimation());
+    startAnimation()
+  }, [mosaicTiles]);
+  // animation loop restarts every fifteen sections
+  const animationCycleDuration: number = 15000 
+  // when exiting loop, cancelAnimationFrame(frameID)
+  let frameID: number;
+  // start requestAnimationFrame animation loop
+  function startAnimation () {
     let beginTime = performance.now();
-
+    // this function is recrusively passed to requestAnimationFrame
     function step(timeStamp: DOMHighResTimeStamp) {
       let elapsedTime = timeStamp - beginTime;
-
+      // check of fifteen seconds have elapsed and restart loop if true
       if (elapsedTime > animationCycleDuration) {
         beginTime = performance.now();
         elapsedTime = 0;
-        mosaicTiles.forEach((tile) => tile.resetEvents());
+        mosaicTiles.forEach((tile) => tile.resetAnimation());
       }
-
+      // animation loop update
       mosaicTiles.forEach((mosaicTile) => {
-        if (elapsedTime > mosaicTile.nextEventTime) {
-          mosaicTile.updateEvent();
-        }
-        //context.clearRect(0, 0, canvasWidth, canvasWidth);
+        // check each mosaicTile object to see if an animation update is due
+        if (elapsedTime > mosaicTile.nextEventTime) mosaicTile.updateCurrentEventAction();
+        // fire each mosaicTile's current action
         mosaicTile.currentEventAction();
       });
-
-      animationFrameReq = requestAnimationFrame(step);
+      // recursive call - save return value for cancelAnimationFrame(frameID)
+      frameID = requestAnimationFrame(step);
     }
-    animationFrameReq = requestAnimationFrame(step);
+    // initial call - save return value for cancelAnimationFrame(frameID)
+    frameID = requestAnimationFrame(step);
   }
+
+  ////////////////////////////////////////////////////////////////////
+  // UI: onClick callback passed to <MosaicSelector>
+  // <MosaicSelector> presents five buttons corresponding to 
+  // mosaicSlice 'numTiles' state options 2, 3, 4, 6, or 9 tiles
+  const onClickHandler = (newStateValue: NumTiles) => {
+    cancelAnimationFrame(frameID);
+    canvasRef.current.getContext('2d')?.clearRect(0, 0, canvasWidth, canvasWidth);
+    mosaicTiles.forEach(tile => tile.clearAnimation());
+    dispatch(setNumTiles(newStateValue));
+  }
+
 
   return(
     <>
-		<div className='mosaicTiles-canvasContainer'>
-      <canvas
-        ref={canvasRef}
-        width={canvasWidth}
-        height={canvasWidth}
-        style={{backgroundColor: '#eee'}}
-      />
+    { setMosaicStateLoaded && 
+    <div>
+		  <div className='mosaicTiles-canvasContainer'>
+        <canvas
+          ref={canvasRef}
+          width={canvasWidth}
+          height={canvasWidth}
+        />
+      </div>
+      <div>
+        <MosaicSelector onClickHandler={onClickHandler}/>
+      </div>
     </div>
-    <MosaicSelector
-      onClickHandler={onClickHandler}/>
+    }
     </>
   );
 }

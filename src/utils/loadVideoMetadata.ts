@@ -1,16 +1,12 @@
-
-export type VideoMetadata = { 
-  videoHeight: number,
-  videoWidth: number,
-  duration: number,
-}
+// exported out of videoSlice
+import type { VideoState } from 'features/userVideo/videoSlice';
 
 interface LoadVideoMetadata {
- (filePath: string, waitLimit: number): Promise<VideoMetadata>
+ (src: string, waitLimit: number): Promise<VideoState>
 }
 
 export const loadVideoMetadata: LoadVideoMetadata = (
-  filePath,
+  src,
   waitLimit) => {
   let timeoutId: NodeJS.Timeout;
   const timeout = new Promise<never>((_resolve, reject) => {
@@ -19,15 +15,16 @@ export const loadVideoMetadata: LoadVideoMetadata = (
     }, waitLimit);
   });
 
-  let videoMetadata = new Promise<VideoMetadata>((resolve, _reject) => {
+  let videoMetadata = new Promise<VideoState>((resolve, _reject) => {
     const newVideo = document.createElement('video');
-    newVideo.src = filePath;
+    newVideo.src = src;
     newVideo.addEventListener('loadedmetadata', (ev: Event) => {
       const target = ev.currentTarget as HTMLVideoElement;
       resolve({ 
-        videoHeight: target.videoHeight,
-        videoWidth: target.videoWidth,
-        duration: target.duration
+        src,
+        duration: target.duration,
+        width: target.videoWidth,
+        height: target.videoHeight
       });
       clearTimeout(timeoutId);
     }, { once: true })

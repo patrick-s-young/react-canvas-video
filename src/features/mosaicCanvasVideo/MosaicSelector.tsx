@@ -24,7 +24,7 @@ export const MosaicSelector: React.FC<MosaicSelectorProps> = ({ onClickHandler }
             stateValue={button.stateValue}
             isEnabled={button.stateValue !== numTiles}
             imagePath={button.imagePath}
-            className={'mosaiacSelector-button'}
+            className={button.className}
             altText={button.altText}
             key={uuid()}
           />)
