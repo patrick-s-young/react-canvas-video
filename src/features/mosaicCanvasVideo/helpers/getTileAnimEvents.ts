@@ -1,11 +1,12 @@
+import type { ActionGroupCollection } from 'features/mosaicCanvasVideo/mosaicSlice';
+
 interface GetTileAnimEvents {
-  (): { [index: string] : Array<Array<{ time: number, action: string }>> }
+  (): ActionGroupCollection
 } 
 
-// retrieve values through function to facilitate modifications of data if needed
-export const getTileAnimEvents: GetTileAnimEvents = () => tileAnimEvents;
-
-const tileAnimEvents: { [index: string] : Array<Array<{ time: number, action: string }>> } = {
+// retrieve values through function to facilitate filtering of data if needed
+export const getTileAnimEvents: GetTileAnimEvents = () => {
+  return {
   2:[
       [ // row: 0, col: 0
         { time: 500,    action: 'fadeIn'},
@@ -251,3 +252,4 @@ const tileAnimEvents: { [index: string] : Array<Array<{ time: number, action: st
       ]
     ]
   }
+}
