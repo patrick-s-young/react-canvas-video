@@ -20,6 +20,7 @@ const App: React.FC = () => {
 	// <VideoUpload> is a mock for user-initiated video uploads
 	return (
 			<div className='app-container' style={{width: `${appScreenWidth}px`}}>
+				<div>Canvas Video</div>
 				{!videoReady
 					? <VideoUpload onVideoSelectedCallback={onVideoSelectedCallback}/>
 					: <MosaicTiles
