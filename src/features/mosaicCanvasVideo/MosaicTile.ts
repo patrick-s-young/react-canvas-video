@@ -1,149 +1,195 @@
-export class MosaicTile {
-  // constant values directly initialized by constructor args
-  context: CanvasRenderingContext2D;
-  inPoint: number;
-  copyFrom: { x: number, y: number, width: number, height: number };
-  drawTo: { x: number, y: number, width: number, height: number };
-  // constant values indirectly initialized by constructor args
-  video: HTMLVideoElement;
 
-  // used by 'fadeIn()' and 'fadeOut()' animation
-  // mehtods to calculate transparency of video drawn to canvas
-  fadeDuration: number;
-  fadeStartTime: number;
-  opacity: number;
+type CopyVideoFromArea =  { x: number, y: number, width: number, height: number };
+type DrawToCanvasArea = { x: number, y: number, width: number, height: number };
+type TileAnimEvents = Array<{ time: number, action: string }>;
 
-  // timing of assigning animation methods 'fadeIn' and 'fadeOut' 
-  // to currentEventAction(). Occurs within updateEvent()
-  events: Array<{ time: number, action: string }>;
-  nextEventTime: number; 
-  nextEventIndex: number; 
-  maxEventIndex: number;
-  currentEventAction: (this: MosaicTile) => void;
+export interface MosaicTile {
+  _video: HTMLVideoElement,
+  _context: CanvasRenderingContext2D,
+  _inPoint: number,
+  _copyVideoFromArea: CopyVideoFromArea,
+  _drawToCanvasArea: DrawToCanvasArea,
+  _tileAnimEvents: TileAnimEvents,
+  _fadeStartTime: number,
+  _fadeDuration: number,
+  _fadeOpacity: number,
+  nextEventTime: number,
+  _nextEventIndex: number,
+  _maxEventIndex: number,
+  setVideoSrc: (
+    this: MosaicTile, 
+    videoSrc: string,
+    ) => void,
+  setContext: (
+    this: MosaicTile,
+    context: CanvasRenderingContext2D
+  ) => void,
+  setAttributes: (
+    this: MosaicTile, 
+    inPoint: number, 
+    copyVideoFromArea: CopyVideoFromArea, 
+    drawToCanvasArea: DrawToCanvasArea, 
+    tileAnimEvents: TileAnimEvents
+    ) => void,
+  initAnimation: (
+    this: MosaicTile
+  ) => void,
+  resetAnimation: (
+    this: MosaicTile
+  ) => void,
+  clearAnimation: (
+    this: MosaicTile
+  ) => void,
+  currentEventAction: (
+    this: MosaicTile
+    ) => void,
+  updateCurrentEventAction: (
+    this: MosaicTile
+  ) => void,
+  _initFadeIn: (
+    this: MosaicTile
+  ) => void,
+  _fadeIn: (
+    this:MosaicTile
+  ) => void,
+  _initFadeOut: (
+    this: MosaicTile
+  ) => void,
+  _fadeOut: (
+    this:MosaicTile
+  ) => void,
+  _drawImage: (
+    this: MosaicTile
+  ) => void,
+  _wait: (
+    this:MosaicTile
+  ) => void
+}
 
-  constructor (
-    context: CanvasRenderingContext2D,
-    inPoint: number,
-    copyVideoFromArea: { x: number, y: number, width: number, height: number },
-    drawToCanvasArea: { x: number, y: number, width: number, height: number },
-    tileAnimEvents: Array<{ time: number, action: string }>,
-    videoURL: string
-  ) {
-
-    this.context = context;
-    this.inPoint = inPoint;
-    this.copyFrom = copyVideoFromArea;
-    this.drawTo = drawToCanvasArea;
-
-    //const videoToClone = document.getElementById('videoSrc') as HTMLVideoElement;
-    //this.video = videoToClone.cloneNode(true) as HTMLVideoElement;
-    this.video = document.createElement('video');
-    this.video.src = videoURL;
-    this.video.autoplay = true;
-    this.video.loop = true;
-    this.video.muted = true;
-    this.video.setAttribute('webkit-playsinline', 'webkit-playsinline');// Fix fullscreen problem on IOS 8 and 9
-    this.video.setAttribute('playsinline', 'playsinline');// Fix fullscreen problem on IOS 10
-    //this.video.play();
-
-    // constant class values
-    this.fadeDuration = 500;
-    // dynamic values
-    this.currentEventAction = () => {};
-    this.fadeStartTime = 0;
-    this.opacity = 0;
-    // animation object
-   
-    
-    // animation events
-    this.events = tileAnimEvents;
-    this.nextEventTime = tileAnimEvents[0].time;
-    this.nextEventIndex = 0;
-    this.maxEventIndex = tileAnimEvents.length;
-  }
-
-
-  updateEvent(this: MosaicTile) {
-    const newCurrentEventAction = this.events[this.nextEventIndex].action;
-    this.nextEventIndex = (this.nextEventIndex + 1) % this.maxEventIndex;
-    this.nextEventTime = this.events[this.nextEventIndex].time;
+export const mosaicTile: Partial<MosaicTile> = {
+  _video: undefined,
+  _context: undefined,
+  _inPoint: undefined,
+  _copyVideoFromArea: undefined,
+  _drawToCanvasArea: undefined,
+  _tileAnimEvents: undefined,
+  _fadeStartTime: undefined,
+  _fadeDuration: 500,
+  _fadeOpacity: undefined,
+  nextEventTime: undefined,
+  _nextEventIndex: undefined,
+  _maxEventIndex: undefined,
+  setVideoSrc(videoSrc) { 
+    this._video = document.createElement('video');
+    this._video.src = videoSrc;
+    this._video.autoplay = true;
+    this._video.loop = true;
+    this._video.muted = true;
+    this._video.setAttribute('webkit-playsinline', 'webkit-playsinline');
+    this._video.setAttribute('playsinline', 'playsinline');
+  },
+  setContext(context) {
+    this._context = context;
+  },
+  setAttributes(inPoint, copyVideoFromArea, drawToCanvasArea, tileAnimEvents) {
+    this._inPoint = inPoint;
+    this._copyVideoFromArea = copyVideoFromArea;
+    this._drawToCanvasArea = drawToCanvasArea;
+    this._tileAnimEvents = tileAnimEvents;
+    this._maxEventIndex = this._tileAnimEvents.length;
+  },
+  initAnimation() {
+    this.currentEventAction = this._wait;
+    this._nextEventIndex = 0;
+    this.nextEventTime = this._tileAnimEvents[this._nextEventIndex].time;
+    this._video.currentTime = this._inPoint;
+  },
+  resetAnimation() {
+    this._nextEventIndex = 0;
+    this.nextEventTime = this._tileAnimEvents[this._nextEventIndex].time;
+  },
+  clearAnimation() {
+    this.currentEventAction = this._wait;
+    this._video.pause();
+    this._video.removeAttribute('src');
+    this._video.load();
+  },
+  currentEventAction() {},
+  updateCurrentEventAction() {
+    const newCurrentEventAction = this._tileAnimEvents[this._nextEventIndex].action;
+    this._nextEventIndex = (this._nextEventIndex + 1) % this._maxEventIndex;
+    this.nextEventTime = this._tileAnimEvents[this._nextEventIndex].time;
 
     switch(newCurrentEventAction) {
       case 'fadeIn':
-        this.fadeIn();
+        this._initFadeIn();
         break;
       case 'fadeOut':
-        this.fadeOut();
+        this._initFadeOut();
         break;
       default:
-        console.log(`ERROR: no case for ${newCurrentEventAction}`);
+        console.log(`ERROR: no case for ${newCurrentEventAction}`); // todo: add error handling
     }
-  }
-
-  clear() {
-    this.video.pause();
-    this.video.removeAttribute('src');
-    this.video.load();
-    this.context.clearRect(this.drawTo.x, this.drawTo.y, this.drawTo.width, this.drawTo.height);
-    this.currentEventAction = () => {}
-    console.log('clear');
-  }
-
-  start() {
-    this.video.play();
-    console.log('start');
-  }
-  resetEvents() {
-    this.nextEventIndex = 0;
-    this.nextEventTime = this.events[0].time;
-  }
-
-  fadeIn() {
-    this.video.currentTime = this.inPoint;
-    // onseeked
-    this.fadeStartTime = Date.now();
-    this.currentEventAction = () => {
-      const timeElapsed = Date.now() - this.fadeStartTime;
-      this.opacity = timeElapsed / this.fadeDuration;
-      if (this.opacity > 1) {
-        this.opacity = 1;
-        this.currentEventAction = this.drawImage;
+  },
+  _initFadeIn() {
+    this._video.currentTime = this._inPoint;
+    this._fadeStartTime = Date.now();
+    this._video.play();
+    this.currentEventAction = this._fadeIn;
+  },
+  _fadeIn() {
+      const timeElapsed = Date.now() - this._fadeStartTime;
+      this._fadeOpacity = timeElapsed / this._fadeDuration;
+      if (this._fadeOpacity > 1) {
+        this._fadeOpacity = 1;
+        this.currentEventAction = this._drawImage;
         return;
       }
-      this.drawImage();
-    }
-  }
-
-  fadeOut() {
-    this.fadeStartTime = Date.now();
-    this.currentEventAction = () => {
-      const timeElapsed = Date.now() - this.fadeStartTime;
-      this.opacity = 1 - timeElapsed / this.fadeDuration;
-      if (this.opacity <= 0) {
-        this.opacity = 0;
-        this.drawImage();
-        this.currentEventAction = this.wait;
+      this._drawImage();
+  },
+  _initFadeOut() {
+    this._fadeStartTime = Date.now();
+    this.currentEventAction = this._fadeOut;
+  },
+  _fadeOut() {
+      const timeElapsed = Date.now() - this._fadeStartTime;
+      this._fadeOpacity = 1 - timeElapsed / this._fadeDuration;
+      if (this._fadeOpacity < 0) {
+        this._fadeOpacity = 0;
+        this._drawImage();
+        this._video.pause();
+        this._video.currentTime = this._inPoint;
+        this.currentEventAction = this._wait;
         return;
       }
-      this.drawImage();
-    }
-  }
+      this._drawImage();
+  },
+  _drawImage() {
+    if (this._drawToCanvasArea.width === 0) return;
 
-  drawImage(this: MosaicTile) {
+    this._context.clearRect(
+      this._drawToCanvasArea.x, 
+      this._drawToCanvasArea.y, 
+      this._drawToCanvasArea.width, 
+      this._drawToCanvasArea.height
+    );
 
-    this.context.clearRect(this.drawTo.x, this.drawTo.y, this.drawTo.width, this.drawTo.height);
-    //this.context.save();
+    this._context.globalAlpha = this._fadeOpacity;
 
-    this.context.globalAlpha = this.opacity;
-    this.context.drawImage(
-      this.video,
-      this.copyFrom.x, this.copyFrom.y, this.copyFrom.width, this.copyFrom.height,
-      this.drawTo.x, this.drawTo.y, this.drawTo.width, this.drawTo.height);
-    //this.context.restore();
-  }
-
-  wait() {
-    // opacity is zero. wait for fadeIn event
-  }
-
+    this._context.drawImage(
+      this._video,
+      this._copyVideoFromArea.x, 
+      this._copyVideoFromArea.y, 
+      this._copyVideoFromArea.width, 
+      this._copyVideoFromArea.height,
+      this._drawToCanvasArea.x, 
+      this._drawToCanvasArea.y, 
+      this._drawToCanvasArea.width, 
+      this._drawToCanvasArea.height
+    );
+  },
+  _wait() {}
 }
+
+
+

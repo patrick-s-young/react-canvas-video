@@ -1,24 +1,25 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+
 export interface VideoState {
-  src: string | null
-  duration: number | null
-  width: number | null
-  height: number | null
+  src: string
+  duration: number
+  width: number
+  height: number
 }
 
-const initialState: VideoState = {
-  src: null,
-  duration: null,
-  width: null,
-  height: null
+const initialState: Partial<VideoState> = {
+  src: undefined,
+  duration: undefined,
+  width: undefined,
+  height: undefined
 }
 
 const videoSlice = createSlice({
   name: 'video',
   initialState,
   reducers: {
-    setVideoData (state, action: PayloadAction<VideoState>) {
+    setVideoState (state, action: PayloadAction<VideoState>) {
       const { src, duration, width, height } = action.payload;
       state.src = src;
       state.duration = duration;
@@ -29,9 +30,9 @@ const videoSlice = createSlice({
 });
 
 export const {
-  setVideoData
+  setVideoState
 } = videoSlice.actions;
 
-export type SetVideoData = ReturnType<typeof setVideoData>;
+export type SetVideoState = ReturnType<typeof setVideoState>;
 
 export default videoSlice.reducer;
