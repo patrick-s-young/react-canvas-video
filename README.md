@@ -4,10 +4,9 @@
 Make sure you have [Node.js](https://nodejs.org/) installed.
 ```
 git clone https://github.com/patrick-s-young/react-canvas-video.git
-cd react-ts-eslint-webpack-babel
+cd react-canvas-video
 npm install
 npm start
-npm test
 ```
 ## Built With
 * [React](https://reactjs.org/) - A JavaScript library for building user interfaces.
