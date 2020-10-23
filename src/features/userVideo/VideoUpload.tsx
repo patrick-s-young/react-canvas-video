@@ -46,7 +46,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({ onVideoSelectedCallbac
       {videoSelected 
         ? <div className='video-upload-preview'>
             <video src={src}width={width > window.innerWidth ? window.innerWidth : width} webkit-playsinline='true' playsInline={true} muted autoPlay loop style={{ paddingBottom: '10px'}}/>
-            <button onClick={onVideoSelectedCallback} >Use This Video</button>
+            <button onClick={onVideoSelectedCallback} >Select Video</button>
           </div>
         : <img src='images/loading_200x200.gif' alt='loading' style={{ marginTop: '140px'}}/>
       }
